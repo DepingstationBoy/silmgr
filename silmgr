@@ -1,0 +1,60 @@
+#!/bin/bash
+
+FILE=$(cd $(dirname "$0"); pwd)"/cmdsf"
+CURRENTJOBF=$(cd $(dirname "$0"); pwd)"/currentjobf"
+
+if [[ ! -e $FILE ]]; then
+	touch $FILE
+fi
+if [[ ! -e $CURRENTJOBF ]]; then
+	touch $CURRENTJOBF
+fi
+
+while getopts "a:lhr:ec" opt
+do
+	case $opt in
+		a)
+			WKDIR=`pwd`
+			echo ${OPTARG}"=_="${WKDIR} >> $FILE
+		;;
+		l)
+			cat -n $FILE
+		;;
+		r)
+			num=$OPTARG
+			echo $OPTARG
+			all=$(cat $FILE | wc -l)
+			before=$(cat $FILE | head -n $(($num-1)))
+			latter=$(cat $FILE | tail -n $(($all-$num)))
+            rm -f $FILE
+            if [[ -n $before ]]; then
+    			echo $before > $FILE
+            fi
+            if [[ -n $latter ]]; then
+    			echo $latter >> $FILE
+            fi
+            if [[ ! -e $FILE ]]; then
+                touch $FILE
+            fi
+		;;
+		e)
+			rm -f $FILE
+			touch $FILE
+		;;
+		c)
+			cat $CURRENTJOBF
+		;;
+		h)
+			echo "help information"
+			echo "-a \"job\"      append a new job"
+			echo "-l            list all jobs"
+			echo "-r num        remove a job by number"
+			echo "-c            current job"
+			echo "-e            empty job list"
+			echo "-h            for help information"
+		;;
+		?)
+			echo "-h option for help"
+		;;
+	esac
+done

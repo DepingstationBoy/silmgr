@@ -1,0 +1,29 @@
+#!/bin/bash
+
+FILE=$(cd $(dirname $0); pwd)"/cmdsf"
+CURRENTJOBF=$(cd $(dirname $0); pwd)"/currentjobf"
+
+while true
+do
+	cmddir=$(cat $FILE | head -1)
+	if [[ -n $cmddir ]]; then
+		(cat $FILE | tail -n $(($(cat $FILE|wc -l)-1)) > $FILE)
+		cmd=$(echo $cmddir | awk -F "=_=" '{print $1}')
+		wkdir=$(echo $cmddir | awk -F "=_=" '{print $2}')
+		#echo $cmddir
+		#echo $cmd
+		#echo $wkdir
+		#cat -n $FILE
+		echo "job:    $cmd" > $CURRENTJOBF
+		echo "wkdir:  $wkdir" >> $CURRENTJOBF
+		cd $wkdir
+		$cmd
+		cd $(cd $(dirname $0); pwd)
+		rm -f $CURRENTJOBF
+		touch $CURRENTJOBF 
+		sleep 3
+	else
+		#echo "else"
+		sleep 3
+	fi
+done
